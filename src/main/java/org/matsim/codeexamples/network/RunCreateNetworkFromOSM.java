@@ -10,7 +10,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.core.utils.io.OsmNetworkReader;
+import org.matsim.codeexamples.network.OsmNetworkReader;
 import org.opengis.feature.simple.SimpleFeature;
 
 import java.nio.file.Path;
@@ -28,7 +28,9 @@ import java.util.Collection;
 public class RunCreateNetworkFromOSM {
 
 	private static String UTM32nAsEpsg = "EPSG:25832";
+
 	private static Path input = Paths.get("/path/to/your/input/data.osm");
+	private static Path output = Paths.get("/path/to/your/output/network.xml.gz");
 	private static Path filterShape = Paths.get("/path/to/your/filter/shape-file.shp");
 
 	public static void main(String[] args) {
@@ -48,7 +50,8 @@ public class RunCreateNetworkFromOSM {
 
 		// create an osm network reader with a filter
 		OsmNetworkReader reader = new OsmNetworkReader(network, transformation, true, true);
-		reader.addOsmFilter(new NetworkFilter(filterShape));
+		if (filterShape != null)
+			reader.addOsmFilter(new NetworkFilter(filterShape));
 
 		// the actual work is done in this call. Depending on the data size this may take a long time
 		reader.parse(input.toString());
@@ -57,7 +60,7 @@ public class RunCreateNetworkFromOSM {
 		new NetworkCleaner().run(network);
 
 		// write out the network into a file
-		new NetworkWriter(network).write("/path/to/your/output/network.xml.gz");
+		new NetworkWriter(network).write(output.toString());
 	}
 
 	/**
