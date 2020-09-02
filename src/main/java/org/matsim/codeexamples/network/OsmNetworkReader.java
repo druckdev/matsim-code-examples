@@ -87,7 +87,7 @@ public class OsmNetworkReader implements MatsimSomeReader {
 	private final static String TAG_LANES = "lanes";
 	private final static String TAG_LANES_FORWARD = "lanes:forward";
 	private final static String TAG_LANES_BACKWARD = "lanes:backward";
-	private final static String TAG_HIGHWAY = "highway";
+	private final static String TAG_HIGHWAY = "waterway";
 	private final static String TAG_MAXSPEED = "maxspeed";
 	private final static String TAG_JUNCTION = "junction";
 	private final static String TAG_ONEWAY = "oneway";
@@ -158,45 +158,19 @@ public class OsmNetworkReader implements MatsimSomeReader {
 
 		if (useHighwayDefaults) {
 			log.info("Falling back to default values.");
-			this.setHighwayDefaults(1, "motorway",      2, 120.0/3.6, 1.0, 2000, true);
-			this.setHighwayDefaults(1, "motorway_link", 1,  80.0/3.6, 1.0, 1500, true);
-			this.setHighwayDefaults(2, "trunk",         1,  80.0/3.6, 1.0, 2000);
-			this.setHighwayDefaults(2, "trunk_link",    1,  50.0/3.6, 1.0, 1500);
-			if (useVspAdjustments) {
-				this.setHighwayDefaults(3, "primary",       1,  80.0/3.6, 1.0, 1000);
-				this.setHighwayDefaults(3, "primary_link",  1,  60.0/3.6, 1.0, 1000);
-			} else {
-				this.setHighwayDefaults(3, "primary",       1,  80.0/3.6, 1.0, 1500);
-				this.setHighwayDefaults(3, "primary_link",  1,  60.0/3.6, 1.0, 1500);
-			}
-			
-//			this.setHighwayDefaults(4, "secondary",     1,  60.0/3.6, 1.0, 1000);
-//			this.setHighwayDefaults(5, "tertiary",      1,  45.0/3.6, 1.0,  600);
-//			this.setHighwayDefaults(6, "minor",         1,  45.0/3.6, 1.0,  600);
-//			this.setHighwayDefaults(6, "unclassified",  1,  45.0/3.6, 1.0,  600);
-//			this.setHighwayDefaults(6, "residential",   1,  30.0/3.6, 1.0,  600);
-//			this.setHighwayDefaults(6, "living_street", 1,  15.0/3.6, 1.0,  300);
 
-			// Setting the following to considerably smaller values, since there are often traffic signals/non-prio intersections. 
-			// If someone does a systematic study, please report.  kai, jul'16
-			//
-			// We revised the below street types (removed "minor" and put "living_street", "residential", and "unclassified" into
-			// different hierarchy layers), trying to make this more reasonable based on the
-			// <a href="OMS Wiki">http://wiki.openstreetmap.org/wiki/DE:Key:highway</a>, ts/aa/dz, oct'17
-			if (useVspAdjustments) {
-				this.setHighwayDefaults(4, "secondary",     1,  30.0/3.6, 1.0, 800);
-				this.setHighwayDefaults(4, "secondary_link",     1,  30.0/3.6, 1.0, 800);
-			} else {
-				this.setHighwayDefaults(4, "secondary",     1,  30.0/3.6, 1.0, 1000);
-				this.setHighwayDefaults(4, "secondary_link",     1,  30.0/3.6, 1.0, 1000);
-			}
-			this.setHighwayDefaults(5, "tertiary",      1,  25.0/3.6, 1.0,  600);
-			this.setHighwayDefaults(5, "tertiary_link",      1,  25.0/3.6, 1.0,  600);
-			this.setHighwayDefaults(6, "unclassified",  1,  15.0/3.6, 1.0,  600);
-			this.setHighwayDefaults(7, "residential",   1,  15.0/3.6, 1.0,  600);
-			this.setHighwayDefaults(8, "living_street", 1,  10.0/3.6, 1.0,  300);
-			// changing the speed values failed the evacuation ScenarioGenerator test because of a different network -- DESPITE
-			// the fact that all the speed values are reset to some other value there.  No idea what happens there. kai, jul'16
+			this.setHighwayDefaults("river");
+			this.setHighwayDefaults("riverbank");
+			this.setHighwayDefaults("stream");
+			this.setHighwayDefaults("tidal_channel");
+			this.setHighwayDefaults("canal");
+			this.setHighwayDefaults("drain");
+			this.setHighwayDefaults("ditch");
+			this.setHighwayDefaults("fairway");
+			this.setHighwayDefaults("lockgate");
+			this.setHighwayDefaults("dam");
+			this.setHighwayDefaults("weir");
+			this.setHighwayDefaults("turning_point");
 		}
 	}
 
@@ -288,6 +262,14 @@ public class OsmNetworkReader implements MatsimSomeReader {
 		log.info("= end of conversion statistics ====================");
 	}
 
+	/**
+	 * Sets defaults for converting OSM waterways into MATSim links, assuming it is a waterway and no oneway.
+	 *
+	 * @param type The type of waterway these defaults are for.
+	 */
+	public final void setHighwayDefaults(final String type) {
+		setHighwayDefaults(1, type, 2, 12.0/3.6, 1.0, 1000, false);
+	}
 	/**
 	 * Sets defaults for converting OSM highway paths into MATSim links, assuming it is no oneway road.
 	 *
