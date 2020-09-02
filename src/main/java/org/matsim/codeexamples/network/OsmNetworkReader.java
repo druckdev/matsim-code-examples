@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package org.matsim.core.utils.io;
+package org.matsim.codeexamples.network;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -30,6 +30,8 @@ import org.matsim.core.api.internal.MatsimSomeReader;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.io.MatsimXmlParser;
+import org.matsim.core.utils.io.UncheckedIOException;
 import org.matsim.core.utils.misc.Counter;
 import org.xml.sax.Attributes;
 
