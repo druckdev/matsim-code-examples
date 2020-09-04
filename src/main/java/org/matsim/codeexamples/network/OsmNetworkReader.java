@@ -402,7 +402,7 @@ public class OsmNetworkReader implements MatsimSomeReader {
 
 				// first and last are counted twice, so they are kept in all cases
 				this.nodes.get(way.nodes.get(0)).ways++;
-				this.nodes.get(way.nodes.get(way.nodes.size()-1)).ways++;
+				this.nodes.get(way.nodes.get(way.nodes.size() - 1)).ways++;
 
 				for (Long nodeId : way.nodes) {
 					OsmNode node = this.nodes.get(nodeId);
@@ -411,7 +411,7 @@ public class OsmNetworkReader implements MatsimSomeReader {
 						node.ways++;
 					} else {
 						for (OsmFilter osmFilter : this.hierarchyLayers) {
-							if(osmFilter.coordInFilter(node.coord, way.hierarchy)){
+							if (osmFilter.coordInFilter(node.coord, way.hierarchy)) {
 								node.used = true;
 								node.ways++;
 								break;
@@ -510,15 +510,15 @@ public class OsmNetworkReader implements MatsimSomeReader {
 							length += CoordUtils.calcEuclideanDistance(lastToNode.coord, toNode.coord);
 							if (toNode.used) {
 
-								if(this.hierarchyLayers.isEmpty()) {
+								if (this.hierarchyLayers.isEmpty()) {
 									createLink(this.network, way, fromNode, toNode, length);
 								} else {
 									for (OsmFilter osmFilter : this.hierarchyLayers) {
-										if(osmFilter.coordInFilter(fromNode.coord, way.hierarchy)){
+										if (osmFilter.coordInFilter(fromNode.coord, way.hierarchy)) {
 											createLink(this.network, way, fromNode, toNode, length);
 											break;
 										}
-										if(osmFilter.coordInFilter(toNode.coord, way.hierarchy)){
+										if (osmFilter.coordInFilter(toNode.coord, way.hierarchy)) {
 											createLink(this.network, way, fromNode, toNode, length);
 											break;
 										}
@@ -544,9 +544,9 @@ public class OsmNetworkReader implements MatsimSomeReader {
 			final double length) {
 		String highway = way.tags.get(TAG_HIGHWAY);
 
-        if ("no".equals(way.tags.get(TAG_ACCESS))) {
-             return;
-        }
+		if ("no".equals(way.tags.get(TAG_ACCESS))) {
+			return;
+		}
 		
 		// load defaults
 		OsmHighwayDefaults defaults = this.highwayDefaults.get(highway);
@@ -813,10 +813,7 @@ public class OsmNetworkReader implements MatsimSomeReader {
 
 		@Override
 		public boolean coordInFilter(final Coord coord, final int hierarchyLevel){
-			if(this.hierarchy < hierarchyLevel){
-				return false;
-			}
-			return true ;
+			return this.hierarchy >= hierarchyLevel;
 		}
 	}
 
@@ -952,7 +949,7 @@ public class OsmNetworkReader implements MatsimSomeReader {
 							for (OsmFilter osmFilter : OsmNetworkReader.this.hierarchyLayers) {
 								for (Long nodeId : this.currentWay.nodes) {
 									OsmNode node = this.nodes.get(nodeId);
-									if(node != null && osmFilter.coordInFilter(node.coord, this.currentWay.hierarchy)){
+									if (node != null && osmFilter.coordInFilter(node.coord, this.currentWay.hierarchy)) {
 										used = true;
 										break;
 									}
