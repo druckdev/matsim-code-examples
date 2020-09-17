@@ -3,14 +3,14 @@ package org.matsim.codeexamples.network;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.codeexamples.network.OsmNetworkReader;
+import org.matsim.codeexamples.network.NetworkCleaner;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.codeexamples.network.OsmNetworkReader;
 import org.opengis.feature.simple.SimpleFeature;
 
 import java.nio.file.Path;
