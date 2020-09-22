@@ -20,12 +20,7 @@
 
 package org.matsim.codeexamples.network;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
@@ -120,20 +115,18 @@ public final class NetworkCleaner implements NetworkRunnable {
 		// search the biggest cluster of nodes in the network
 		log.info("  checking " + network.getNodes().size() + " nodes and " +
 				network.getLinks().size() + " links for dead-ends...");
-		boolean stillSearching = true;
 		Iterator<? extends Node> iter = network.getNodes().values().iterator();
-		while (iter.hasNext() && stillSearching) {
+		while (iter.hasNext()) {
 			Node startNode = iter.next();
-			if (!visitedNodes.containsKey(startNode.getId())) {
-				Map<Id<Node>, Node> cluster = this.findCluster(startNode, network);
-				visitedNodes.putAll(cluster);
-				if (cluster.size() > biggestCluster.size()) {
-					biggestCluster = cluster;
-					if (biggestCluster.size() >= (network.getNodes().size() - visitedNodes.size())) {
-						// stop searching here, because we cannot find a bigger cluster in the lasting nodes
-						stillSearching = false;
-					}
-				}
+			if (visitedNodes.containsKey(startNode.getId()))
+				continue;
+
+			Map<Id<Node>, Node> cluster = this.findCluster(startNode, network);
+			visitedNodes.putAll(cluster);
+			if (cluster.size() > biggestCluster.size()) {
+				biggestCluster = cluster;
+				if (biggestCluster.size() >= (network.getNodes().size() - visitedNodes.size()))
+					break; // we cannot find a bigger cluster in the lasting nodes
 			}
 		}
 		log.info("    The biggest cluster consists of " + biggestCluster.size() + " nodes.");
@@ -141,7 +134,51 @@ public final class NetworkCleaner implements NetworkRunnable {
 		return biggestCluster;
 	}
 
-	/** 
+	/**
+	 * Searches the num biggest clusters in the given Network. The Network is not modified.
+	 */
+	public TreeSet<Map<Id<Node>, Node>> searchBiggestClusters(Network network, int num) {
+		final Map<Id<Node>, Node> visitedNodes = new TreeMap<>();
+		TreeSet<Map<Id<Node>, Node>> biggestClusters = new TreeSet<>(new Comparator<Map<Id<Node>, Node>>() {
+			@Override
+			public int compare(Map<Id<Node>, Node> o1, Map<Id<Node>, Node> o2) {
+				return ((Integer)o1.size()).compareTo(o2.size());
+			}
+		});
+
+		log.info("running " + this.getClass().getName() + " algorithm...");
+
+		// search the biggest cluster of nodes in the network
+		log.info("  checking " + network.getNodes().size() + " nodes and " +
+				network.getLinks().size() + " links for dead-ends...");
+		Iterator<? extends Node> iter = network.getNodes().values().iterator();
+		while (iter.hasNext()) {
+			Node startNode = iter.next();
+			if (visitedNodes.containsKey(startNode.getId()))
+				continue;
+
+			Map<Id<Node>, Node> cluster = this.findCluster(startNode, network);
+			visitedNodes.putAll(cluster);
+
+			// Add new cluster to list.
+			biggestClusters.add(cluster);
+			if (biggestClusters.size() <= num)
+				continue; // Continue if more cluster "fit" into set.
+
+			// Remove cluster with the lowest size.
+			biggestClusters.pollFirst();
+			if (biggestClusters.first().size() >= (network.getNodes().size() - visitedNodes.size()))
+				break; // We cannot find a bigger cluster in the lasting nodes than the smallest one in the set.
+		}
+		List<Integer> sizes = new ArrayList<>();
+		for (Map<Id<Node>, Node> cluster : biggestClusters.descendingSet())
+			sizes.add(cluster.size());
+		log.info("    The biggest clusters consist of " + sizes.toString() + " nodes.");
+		log.info("  done.");
+		return biggestClusters;
+	}
+
+	/**
 	 * Reducing the network so it only contains nodes included in the biggest Cluster.
 	 * Loop over all nodes and check if they are in the cluster, if not, remove them from the network
 	 */
@@ -156,11 +193,21 @@ public final class NetworkCleaner implements NetworkRunnable {
 				network.getLinks().size() + " links.");
 		log.info("done.");
 	}
-	
+
 	@Override
 	public void run(final Network network) {
 		Map<Id<Node>, Node> biggestCluster = this.searchBiggestCluster(network);
 		reduceToBiggestCluster(network, biggestCluster);
+	}
+
+	public void run(final Network network, final int num) {
+		TreeSet<Map<Id<Node>, Node>> biggestClusters = this.searchBiggestClusters(network, num);
+		// Merge biggest clusters into one map
+		Map<Id<Node>, Node> toKeep = new TreeMap<>();
+		for (Map<Id<Node>, Node> cluster : biggestClusters)
+			toKeep.putAll(cluster);
+		// Keep all nodes in biggest clusters
+		reduceToBiggestCluster(network, toKeep);
 	}
 
 	private static DoubleFlagRole getDoubleFlag(final Node n, final Map<Node, DoubleFlagRole> nodeRoles) {

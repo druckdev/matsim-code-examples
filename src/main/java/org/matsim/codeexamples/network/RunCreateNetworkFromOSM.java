@@ -57,7 +57,8 @@ public class RunCreateNetworkFromOSM {
 		reader.parse(input.toString());
 
 		// clean the network to remove unconnected parts where agents might get stuck
-		new NetworkCleaner().run(network);
+		// Keep the 2 biggest clusters: roads and waterways
+		new NetworkCleaner().run(network, 2);
 
 		// write out the network into a file
 		new NetworkWriter(network).write(output.toString());
